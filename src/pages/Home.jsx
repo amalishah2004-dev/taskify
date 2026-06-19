@@ -1,19 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import TaskQuickAdd from "../components/TaskQuickAdd";
 import TasksList from "../components/TasksList";
+import Reducer from "../features/Reducer";
+
+
 
 function Home() {
-  const [text, setText] = useState("");
-  const [items, setItems] = useState(() => {
+  const [items, dispatch] = useReducer(Reducer, [], () => {
     const saveItems = localStorage.getItem("items");
     return saveItems ? JSON.parse(saveItems) : [];
   });
 
-  function handleClick(e) {
+  const [text, setText] = useState("");
+
+  const handleToggle = (taslId) => {
+    dispatch({ type: "toggle", payload: taslId });
+  };
+
+  const handleClick = (e) => {
     e.preventDefault();
-    setItems([...items, text]);
+    dispatch({ type: "click", payload: text });
     setText("");
-  }
+  };
 
   useEffect(() => {
     localStorage.setItem("items", JSON.stringify(items));
@@ -24,7 +32,7 @@ function Home() {
       <TaskQuickAdd text={text} setText={setText} handleClick={handleClick} />
       <hr className="my-8 border-slate-300 mx-auto max-w-2xl " />
       <div className="mx-auto max-w-2xl font-semibold ">Task List</div>
-      <TasksList items={items} />
+      <TasksList items={items} handleToggle={handleToggle} />
     </div>
   );
 }
